@@ -4,24 +4,6 @@
 
 Онлайн-версия: https://foxes-lake.vercel.app/
 
-## Как запустить
-
-Сборка не нужна, зависимостей нет.
-
-```
-git clone https://github.com/kirarx-cyber/foxesba.git
-cd foxesba
-```
-
-Дальше — открыть `index.html` двойным кликом в любом браузере. Всё.
-
-Если нужен локальный сервер (например, чтобы отдать ссылку коллеге в той же сети):
-
-```powershell
-python -m http.server 8000
-```
-
-и открыть `http://localhost:8000`.
 
 ## Какой сценарий выбран
 
