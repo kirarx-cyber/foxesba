@@ -1,0 +1,2009 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Лисий диспетчер</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #15191f;
+      --muted: #6d7480;
+      --line: #e7eaf0;
+      --soft-line: #f0f2f6;
+      --paper: #dfe4ec;
+      --panel: #ffffff;
+      --moss: #2f7df0;
+      --moss-dark: #155fc7;
+      --fox: #d46b32;
+      --fox-dark: #9c4b25;
+      --amber: #f0a928;
+      --danger: #ce4b45;
+      --shadow: 0 18px 42px rgba(33, 43, 60, 0.08);
+      --soft-shadow: 0 10px 26px rgba(33, 43, 60, 0.06);
+      --radius: 18px;
+      --pill: 999px;
+      --font: "Satoshi", "Geist", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      --mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font);
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    .app {
+      width: min(1440px, calc(100% - 32px));
+      max-width: calc(100vw - 32px);
+      margin: 56px auto;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 16% 0%, rgba(47, 125, 240, 0.07), transparent 34%),
+        #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(30, 42, 61, 0.12);
+    }
+
+    .product-nav {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .brand-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .brand-mark,
+    .nav-icon,
+    .user-avatar {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 50%;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #1f7af2, #6aa9ff);
+      color: #ffffff;
+      box-shadow: 0 10px 22px rgba(47, 125, 240, 0.22);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero,
+    .forest-map,
+    .panel,
+    .metric,
+    .ranking-item,
+    .worklog-item {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 12px 0 8px;
+      display: grid;
+      align-content: space-between;
+      gap: 20px;
+      min-width: 0;
+      min-height: 218px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(28px, 3.2vw, 42px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .status-line {
+      margin: 0;
+      max-width: 72ch;
+      color: var(--muted);
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .formula {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .code-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 6px 10px;
+      border: 1px solid var(--soft-line);
+      border-radius: 999px;
+      background: #f7f8fb;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .forest-map {
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      min-height: 218px;
+      padding: 18px;
+      background:
+        linear-gradient(135deg, rgba(47, 125, 240, 0.09), transparent 50%),
+        #ffffff;
+    }
+
+    .map-caption {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      min-width: 0;
+    }
+
+    .map-caption span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .map-art {
+      width: 100%;
+      max-width: 100%;
+      height: 156px;
+      display: block;
+      filter: saturate(0.92);
+    }
+
+    .pulse-dot {
+      animation: pulse 1.9s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.42; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1.12); }
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr 1.2fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      position: relative;
+      overflow: hidden;
+      min-height: 138px;
+      padding: 22px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #f5f7fb;
+      border: 1px solid var(--soft-line);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .metric::before {
+      content: "F";
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      z-index: 1;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      color: var(--moss);
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .metric:nth-child(2)::before {
+      content: "#";
+      color: #15191f;
+    }
+
+    .metric:nth-child(3)::before {
+      content: "L";
+      color: var(--moss);
+    }
+
+    .metric:nth-child(4)::before {
+      content: "S";
+      color: var(--moss);
+    }
+
+    .metric:nth-child(1) {
+      background:
+        radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.52), transparent 18%),
+        linear-gradient(135deg, #1f7af2 0%, #2f7df0 54%, #72b2ff 100%);
+      border-color: transparent;
+      color: #ffffff;
+      box-shadow: 0 18px 34px rgba(47, 125, 240, 0.23);
+    }
+
+    .metric:nth-child(1)::after {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(255, 255, 255, 0.65);
+    }
+
+    .metric span,
+    .metric strong,
+    .metric small {
+      position: relative;
+      z-index: 2;
+      padding-right: 54px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .metric:nth-child(1) span,
+    .metric:nth-child(1) small {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(26px, 3vw, 38px);
+      line-height: 1;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .metric small {
+      color: var(--muted);
+      font-size: 12px;
+      display: none;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .left-stack,
+    .right-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 22px;
+      min-width: 0;
+      background: #ffffff;
+      border-color: var(--soft-line);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h2 {
+      margin-bottom: 4px;
+    }
+
+    .panel-header p,
+    .muted {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field-grid,
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-grid.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    label,
+    .field-label {
+      display: grid;
+      gap: 6px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    input[type="text"],
+    input[type="time"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      padding: 11px 14px;
+      border: 1px solid var(--soft-line);
+      border-radius: 14px;
+      background: #f8f9fc;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(47, 125, 240, 0.72);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(47, 125, 240, 0.11);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--moss);
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 54px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .value-badge {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 8px;
+      border: 1px solid var(--soft-line);
+      border-radius: 12px;
+      background: #f8f9fc;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      padding: 11px 14px;
+      border: 1px solid var(--soft-line);
+      border-radius: 14px;
+      background: #f8f9fc;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--moss);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 38px;
+      padding: 11px 16px;
+      border: 1px solid transparent;
+      border-radius: var(--pill);
+      background: var(--moss);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 750;
+      line-height: 1;
+      transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+    }
+
+    .btn:hover {
+      background: var(--moss-dark);
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .btn.secondary {
+      border-color: var(--soft-line);
+      background: #f8f9fc;
+      color: var(--ink);
+    }
+
+    .btn.secondary:hover {
+      background: #eef3fb;
+    }
+
+    .btn.danger {
+      background: #ffffff;
+      border-color: rgba(206, 75, 69, 0.24);
+      color: var(--danger);
+    }
+
+    .btn.danger:hover {
+      background: #fff3f1;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      flex: 0 0 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius);
+      background: #f8f9fc;
+    }
+
+    table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f5f6f9;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr.top-fox-row {
+      background: rgba(47, 125, 240, 0.06);
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid var(--soft-line);
+      border-radius: 999px;
+      background: #f8f9fc;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .badge.fox {
+      border-color: rgba(47, 125, 240, 0.2);
+      background: rgba(47, 125, 240, 0.08);
+      color: var(--moss-dark);
+    }
+
+    .badge.moss {
+      border-color: rgba(47, 125, 240, 0.2);
+      background: rgba(47, 125, 240, 0.08);
+      color: var(--moss-dark);
+    }
+
+    .badge.danger {
+      border-color: rgba(163, 58, 52, 0.25);
+      background: rgba(163, 58, 52, 0.08);
+      color: var(--danger);
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--fox);
+      border: 1px solid rgba(35, 38, 33, 0.14);
+    }
+
+    .color-dot.black {
+      background: #303331;
+    }
+
+    .color-dot.silver {
+      background: #aeb7b5;
+    }
+
+    .color-dot.red {
+      background: #bf6737;
+    }
+
+    .inline-range {
+      display: grid;
+      grid-template-columns: minmax(90px, 1fr) 34px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inline-range output {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .ranking-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ranking-item {
+      padding: 18px;
+      box-shadow: none;
+      border-color: var(--soft-line);
+      display: grid;
+      gap: 10px;
+    }
+
+    .ranking-item.top {
+      border-color: rgba(47, 125, 240, 0.28);
+      background:
+        linear-gradient(135deg, rgba(47, 125, 240, 0.1), rgba(255, 255, 255, 0.86)),
+        #ffffff;
+    }
+
+    .rank-head {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .rank-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--moss);
+      color: #ffffff;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .rank-score {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 850;
+    }
+
+    .rank-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .explanation,
+    .report-box {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .report-box {
+      padding: 14px;
+      border: 1px solid var(--soft-line);
+      border-radius: var(--radius);
+      background: #f8f9fc;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .report-box strong {
+      color: var(--moss-dark);
+    }
+
+    .json-message,
+    .form-message {
+      min-height: 20px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .json-message.error,
+    .form-message.error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .json-message.success,
+    .form-message.success {
+      color: var(--moss-dark);
+      font-weight: 700;
+    }
+
+    .worklog-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .worklog-panel {
+      margin-top: 18px;
+    }
+
+    .worklog-item {
+      position: relative;
+      padding: 14px 14px 14px 48px;
+      box-shadow: none;
+      border-color: var(--soft-line);
+    }
+
+    .worklog-item h3 {
+      margin-bottom: 4px;
+    }
+
+    .worklog-item code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: rgba(47, 125, 240, 0.09);
+      color: var(--moss-dark);
+    }
+
+    .worklog-item .worklog-question {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--moss);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .worklog-item ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .worklog-item li {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .worklog-item li strong {
+      color: var(--ink);
+    }
+
+    .worklog-item::before {
+      content: attr(data-step);
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--moss);
+      color: #ffffff;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .empty-state {
+      padding: 22px;
+      border: 1px dashed #cad4e4;
+      border-radius: var(--radius);
+      background: #f8f9fc;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .cell-input {
+      min-height: 36px !important;
+      padding: 7px 9px !important;
+      border-radius: 10px !important;
+      background: #ffffff !important;
+      font-size: 12px;
+    }
+
+    .cell-input.mono {
+      font-family: var(--mono);
+    }
+
+    .editable-color {
+      display: grid;
+      grid-template-columns: 10px minmax(92px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1180px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        width: min(720px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        margin: 12px auto;
+        padding: 18px;
+      }
+
+      .topbar,
+      .metrics-grid,
+      .form-grid.two {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .panel-header {
+        display: grid;
+      }
+    }
+
+    @media (max-width: 560px) {
+      h1 {
+        font-size: 34px;
+      }
+
+      .app {
+        padding: 14px;
+        border-radius: 16px;
+      }
+
+      .brand-lockup {
+        font-size: 20px;
+      }
+
+      .metric {
+        min-height: 118px;
+        padding: 18px;
+      }
+
+      .button-row {
+        width: 100%;
+      }
+
+      .btn {
+        flex: 1 1 auto;
+      }
+
+      .rank-head {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .rank-score {
+        grid-column: 1 / -1;
+        padding-left: 44px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      table {
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tr,
+      tbody tr.top-fox-row {
+        padding: 10px;
+        border: 1px solid var(--soft-line);
+        border-radius: var(--radius);
+        background: #ffffff;
+      }
+
+      tbody tr.top-fox-row {
+        border-color: rgba(183, 93, 50, 0.35);
+        background: rgba(183, 93, 50, 0.08);
+      }
+
+      td {
+        display: grid;
+        grid-template-columns: 116px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--soft-line);
+      }
+
+      td:last-child {
+        border-bottom: 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .inline-range {
+        grid-template-columns: minmax(0, 1fr) 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="product-nav" aria-label="Основная навигация">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2 4.5 13.2h6.4L9.8 22 19.5 9.5h-6.7L13 2Z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <span>Foxdispatch</span>
+      </div>
+    </nav>
+
+    <header class="topbar">
+      <section class="hero" aria-labelledby="app-title">
+        <div>
+          <p class="eyebrow">Рабочий пост лесного смотрителя</p>
+          <h1 id="app-title">Лисий диспетчер</h1>
+          <p class="status-line" id="statusLine">Данные загружаются.</p>
+        </div>
+        <div class="formula" aria-label="Формула рейтинга">
+          <span>score</span>
+          <span class="code-pill">avgSuspicion * вес</span>
+          <span class="code-pill">preyCount * бонус</span>
+          <span class="code-pill">повторы * бонус</span>
+        </div>
+      </section>
+
+      <aside class="forest-map" aria-label="Карта активности">
+        <div class="map-caption">
+          <span>Карта наблюдений</span>
+          <span id="mapHint">Активная точка появится после расчета</span>
+        </div>
+        <svg class="map-art" viewBox="0 0 560 220" role="img" aria-labelledby="mapTitle mapDesc">
+          <title id="mapTitle">Схема лесных локаций</title>
+          <desc id="mapDesc">Северная поляна, Туманная тропа и Моховой овраг с отметками активности.</desc>
+          <defs>
+            <linearGradient id="trail" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#2f7df0" stop-opacity="0.18"></stop>
+              <stop offset="1" stop-color="#d46b32" stop-opacity="0.18"></stop>
+            </linearGradient>
+          </defs>
+          <rect x="8" y="8" width="544" height="204" rx="18" fill="#f8f9fc" stroke="#e7eaf0"></rect>
+          <path d="M48 157 C120 70 193 158 254 104 S382 38 508 84" fill="none" stroke="url(#trail)" stroke-width="24" stroke-linecap="round"></path>
+          <path d="M48 157 C120 70 193 158 254 104 S382 38 508 84" fill="none" stroke="#b9c5d6" stroke-width="2" stroke-dasharray="8 10" stroke-linecap="round"></path>
+          <g>
+            <circle cx="111" cy="105" r="22" fill="#ffffff" stroke="#2f7df0" stroke-width="2"></circle>
+            <circle id="mapNorth" class="pulse-dot" cx="111" cy="105" r="9" fill="#2f7df0" opacity="0.45"></circle>
+            <text x="72" y="148" fill="#657067" font-size="13" font-family="Segoe UI, Arial">Северная поляна</text>
+          </g>
+          <g>
+            <circle cx="280" cy="105" r="22" fill="#ffffff" stroke="#2f7df0" stroke-width="2"></circle>
+            <circle id="mapTrail" class="pulse-dot" cx="280" cy="105" r="9" fill="#2f7df0" opacity="0.45"></circle>
+            <text x="234" y="149" fill="#657067" font-size="13" font-family="Segoe UI, Arial">Туманная тропа</text>
+          </g>
+          <g>
+            <circle cx="430" cy="75" r="22" fill="#ffffff" stroke="#2f7df0" stroke-width="2"></circle>
+            <circle id="mapRavine" class="pulse-dot" cx="430" cy="75" r="9" fill="#2f7df0" opacity="0.45"></circle>
+            <text x="390" y="119" fill="#657067" font-size="13" font-family="Segoe UI, Arial">Моховой овраг</text>
+          </g>
+          <path d="M421 166 c18 -20 42 -20 62 0 c-18 12 -42 12 -62 0Z" fill="#b75d32" opacity="0.9"></path>
+          <path d="M471 159 c18 -9 32 -5 41 7 c-14 6 -27 7 -41 -7Z" fill="#874326"></path>
+          <circle cx="439" cy="159" r="3" fill="#232621"></circle>
+        </svg>
+      </aside>
+    </header>
+
+    <section class="metrics-grid" aria-label="Ключевые метрики">
+      <article class="metric">
+        <span>Уникальные лисы</span>
+        <strong id="uniqueFoxMetric">0</strong>
+      </article>
+      <article class="metric">
+        <span>Всего наблюдений</span>
+        <strong id="totalMetric">0</strong>
+      </article>
+      <article class="metric">
+        <span>Самая активная локация</span>
+        <strong id="topLocationMetric">—</strong>
+      </article>
+      <article class="metric">
+        <span>Самая подозрительная лиса</span>
+        <strong id="topFoxMetric">—</strong>
+      </article>
+    </section>
+
+    <main class="main-grid">
+      <div class="left-stack">
+        <section class="panel" aria-labelledby="controlsTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="controlsTitle">Панель управления</h2>
+              <p>Фильтры и веса пересчитывают все блоки сразу.</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <label>
+              Локация
+              <select id="locationFilter"></select>
+            </label>
+            <label>
+              Цвет
+              <select id="colorFilter"></select>
+            </label>
+            <label class="toggle-row">
+              Только с добычей
+              <input type="checkbox" id="preyFilter">
+            </label>
+            <label>
+              Минимальная подозрительность
+              <span class="range-row">
+                <input type="range" min="0" max="10" step="1" id="minSuspicion">
+                <output class="value-badge" id="minSuspicionValue">0</output>
+              </span>
+            </label>
+            <label>
+              Вес подозрительности
+              <span class="range-row">
+                <input type="range" min="0.5" max="3" step="0.1" id="suspicionWeight">
+                <output class="value-badge" id="suspicionWeightValue">1.4</output>
+              </span>
+            </label>
+            <label>
+              Бонус за добычу
+              <span class="range-row">
+                <input type="range" min="0" max="8" step="0.5" id="preyBonus">
+                <output class="value-badge" id="preyBonusValue">3</output>
+              </span>
+            </label>
+            <label>
+              Бонус за повтор
+              <span class="range-row">
+                <input type="range" min="0" max="6" step="0.5" id="repeatBonus">
+                <output class="value-badge" id="repeatBonusValue">2</output>
+              </span>
+            </label>
+          </div>
+          <div class="button-row">
+            <button class="btn secondary" type="button" id="resetFiltersBtn" title="Сбросить фильтры">
+              <span class="icon" aria-hidden="true">↺</span>
+              Фильтры
+            </button>
+            <button class="btn danger" type="button" id="resetDataBtn" title="Вернуть стартовые наблюдения">
+              <span class="icon" aria-hidden="true">↻</span>
+              Данные
+            </button>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="addTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="addTitle">Новое наблюдение</h2>
+              <p>Запись появится в таблице и рейтинге.</p>
+            </div>
+          </div>
+          <form id="addForm" class="form-grid">
+            <div class="form-grid two">
+              <label>
+                fox_id
+                <input id="newFoxId" type="text" required value="fox_005" autocomplete="off">
+              </label>
+              <label>
+                Время
+                <input id="newTime" type="time" required value="13:20">
+              </label>
+            </div>
+            <label>
+              Локация
+              <input id="newLocation" type="text" required value="Северная поляна" autocomplete="off">
+            </label>
+            <label>
+              Цвет
+              <input id="newColor" type="text" required value="рыжая" autocomplete="off">
+            </label>
+            <label class="toggle-row">
+              Есть добыча
+              <input id="newHasPrey" type="checkbox">
+            </label>
+            <label>
+              Уровень подозрительности
+              <span class="range-row">
+                <input id="newSuspicion" type="range" min="0" max="10" step="1" value="6">
+                <output class="value-badge" id="newSuspicionValue">6</output>
+              </span>
+            </label>
+            <button class="btn" type="submit">
+              <span class="icon" aria-hidden="true">+</span>
+              Добавить
+            </button>
+            <p id="formMessage" class="form-message" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="jsonTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="jsonTitle">JSON-загрузка</h2>
+              <p>Принимается массив наблюдений.</p>
+            </div>
+          </div>
+          <label>
+            JSON
+            <textarea id="jsonInput" spellcheck="false" placeholder='[{"id":"obs_100","fox_id":"fox_007","location":"Северная поляна","color":"рыжая","has_prey":true,"suspicion_level":8,"time":"14:30"}]'></textarea>
+          </label>
+          <div class="button-row">
+            <button class="btn" id="loadJsonBtn" type="button">
+              <span class="icon" aria-hidden="true">⇥</span>
+              Загрузить JSON
+            </button>
+          </div>
+          <p id="jsonMessage" class="json-message" aria-live="polite"></p>
+        </section>
+      </div>
+
+      <div class="right-stack">
+        <section class="panel" aria-labelledby="observationsTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="observationsTitle">Наблюдения</h2>
+              <p id="observationSubhead">Текущая выборка.</p>
+            </div>
+          </div>
+          <div id="observationsView"></div>
+          <p id="observationMessage" class="json-message" aria-live="polite"></p>
+        </section>
+
+        <section class="panel" aria-labelledby="reportTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="reportTitle">Отчет смены</h2>
+              <p>Короткий вывод пересчитывается вместе с фильтрами и весами.</p>
+            </div>
+          </div>
+          <div id="reportBox" class="report-box" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="analysisTitle">
+          <div class="panel-header">
+            <div>
+              <h2 id="analysisTitle">Рейтинг лис</h2>
+              <p>Score раскрыт для каждой лисы.</p>
+            </div>
+          </div>
+          <div id="rankingView"></div>
+        </section>
+      </div>
+    </main>
+
+    <section class="panel worklog-panel" aria-labelledby="worklogTitle">
+      <div class="panel-header">
+        <div>
+          <h2 id="worklogTitle">AI Worklog / Как я работал(а) с AI</h2>
+          <p>Шесть чекпоинтов работы: от постановки задачи до финальной проверки. Без переписки целиком и без приватных данных.</p>
+        </div>
+      </div>
+      <div class="worklog-list">
+        <article class="worklog-item" data-step="1">
+          <p class="worklog-question">Как я сформулировала первую задачу для AI</p>
+          <h3>Сначала PRD, потом код</h3>
+          <p class="muted">Я не просила «сделай приложение про лис». Сначала я написала PRD (<code>PRD_Лисий_диспетчер.md</code>) и только потом отдала его AI как единый источник требований — так у модели не оставалось места для додумывания.</p>
+          <ul>
+            <li><strong>Роль и пользователь:</strong> лесной смотритель, которому нужен рабочий инструмент, а не аналитический дашборд.</li>
+            <li><strong>Формат:</strong> один HTML-файл с vanilla JS, без сборки и внешних зависимостей — чтобы тестовое открывалось двойным кликом.</li>
+            <li><strong>Что должно считаться:</strong> уникальные лисы, активные локации, рейтинг подозрительности, самая подозрительная лиса, объяснение вывода и текстовый отчет.</li>
+            <li><strong>Явное ограничение:</strong> данные живут в JS-состоянии и меняются через интерфейс, никакого бэкенда.</li>
+          </ul>
+        </article>
+        <article class="worklog-item" data-step="2">
+          <p class="worklog-question">Как я просила AI помочь со структурой и интерфейсом</p>
+          <h3>Сначала раскладка экрана, потом логика</h3>
+          <p class="muted">Я отдельно попросила AI предложить разбивку экрана и порядок блоков — до написания кода. Обсуждали не «как назвать функции», а что смотритель видит первым.</p>
+          <ul>
+            <li>AI предложил разделить экран на пять зон: <strong>панель управления</strong> (фильтры и веса), <strong>метрики</strong>, <strong>таблица наблюдений</strong>, <strong>карта активности</strong>, <strong>рейтинг + отчет</strong>.</li>
+            <li>Я попросила отдельно вынести объяснение расчета, чтобы score не выглядел «магическим числом».</li>
+            <li>По архитектуре кода договорились на простую схему: одно состояние <code>state</code> → чистые функции расчета (<code>filterObservations</code>, <code>calculateFoxRanking</code>, <code>buildReport</code>) → один <code>render()</code>. Никаких классов и фреймворков.</li>
+            <li>Просила именно так, потому что мне как PM важно уметь прочитать логику расчета, не разбираясь в реактивности.</li>
+          </ul>
+        </article>
+        <article class="worklog-item" data-step="3">
+          <p class="worklog-question">Какие решения приняла сама, а что изменила после ответа AI</p>
+          <h3>Формула score — мое решение</h3>
+          <ul>
+            <li><strong>Решила сама:</strong> формула остается линейной и читаемой — <code>средняя подозрительность × вес + добыча × бонус + повторные появления × бонус</code>. AI предлагал более «умный» вариант с нормализацией и затуханием по времени — отклонила: смотритель не должен догадываться, откуда взялось число.</li>
+            <li><strong>Решила сама:</strong> веса вынести в интерфейс ползунками, а не зашивать в код — иначе нельзя показать, что выводы меняются вместе с параметрами.</li>
+            <li><strong>Изменила после AI:</strong> согласилась на детерминированную сортировку рейтинга с тай-брейкерами (score → средняя подозрительность → id), иначе при равных score порядок «прыгал».</li>
+            <li><strong>Изменила после AI:</strong> добавила <code>repeatCount = observationCount − 1</code> вместо простого счетчика наблюдений — лиса с одним появлением больше не получает бонус за «повторность».</li>
+            <li><strong>Отклонила:</strong> localStorage и график по времени — вне объема задания, добавляли риск без пользы для проверки.</li>
+          </ul>
+        </article>
+        <article class="worklog-item" data-step="4">
+          <p class="worklog-question">Как дорабатывала логику, UX/UI и поведение интерфейса</p>
+          <h3>Несколько итераций поверх первой версии</h3>
+          <ul>
+            <li><strong>Живой пересчет:</strong> любой фильтр, ползунок или правка ячейки пересчитывают метрики, карту, рейтинг и отчет сразу, без кнопки «применить».</li>
+            <li><strong>Inline-редактирование:</strong> в первой версии наблюдения были только для чтения. Добавила правку прямо в таблице — по PRD пользователь должен менять данные, а не только смотреть.</li>
+            <li><strong>Объяснимость:</strong> у каждой лисы в рейтинге появилось текстовое объяснение (<code>buildFoxExplanation</code>) — какой вклад дала подозрительность, добыча и повторы.</li>
+            <li><strong>Подсветка лидера:</strong> самая подозрительная лиса выделяется одновременно в таблице и в рейтинге, чтобы связь между блоками читалась без поиска глазами.</li>
+            <li><strong>Карта:</strong> активная локация подсвечивается по текущей выборке, а не по всем данным — иначе карта противоречила фильтрам.</li>
+            <li><strong>Статусы:</strong> разделила сообщения формы, загрузки JSON и таблицы. Раньше был один общий блок, и ошибка JSON перетирала подтверждение добавления записи.</li>
+            <li><strong>Пустое состояние:</strong> при нулевой выборке вместо пустой таблицы — понятный текст и рекомендация расширить фильтры.</li>
+          </ul>
+        </article>
+        <article class="worklog-item" data-step="5">
+          <p class="worklog-question">Какие ошибки и слабые места нашла и как исправила</p>
+          <h3>Что сломалось при проверке</h3>
+          <ul>
+            <li><strong>Дубли id при загрузке JSON.</strong> Валидация проверяла поля по одной записи и пропускала повторяющиеся id — рейтинг молча склеивал наблюдения. Добавила <code>validateObservationList</code> с проверкой уникальности по всему массиву.</li>
+            <li><strong>Мусор в данных.</strong> <code>suspicion_level</code> приходил строкой или вне диапазона. Добавила <code>sanitizeObservation</code>: приведение типов, обрезка в 0–10, <code>Boolean</code> для <code>has_prey</code>, регулярка на формат времени HH:MM.</li>
+            <li><strong>Деление на ноль и пустая выборка.</strong> При фильтре без результатов ломался расчет средней и отчет. Теперь пустой случай обрабатывается отдельной веткой с текстом для смотрителя.</li>
+            <li><strong>XSS через поля.</strong> Локации и цвета вставлялись в разметку как есть. Добавила <code>escapeHtml</code> на все пользовательские значения — включая те, что попадают в отчет.</li>
+            <li><strong>Русская морфология.</strong> В отчете было «3 наблюдение». Написала <code>pluralRu</code> — мелочь, но именно она выдает сырой прототип.</li>
+            <li><strong>Нестабильная сортировка</strong> при одинаковых score — закрыта тай-брейкерами (см. шаг 3).</li>
+          </ul>
+        </article>
+        <article class="worklog-item" data-step="6">
+          <p class="worklog-question">Как проверяла финальный результат</p>
+          <h3>Прогон по сценариям, а не «вроде работает»</h3>
+          <p class="muted">Проверяла руками в браузере по списку сценариев, каждый раз сверяя четыре блока сразу: метрики, карту, рейтинг и текст отчета.</p>
+          <ul>
+            <li>Стартовые данные из задания — цифры сошлись с ручным пересчетом формулы.</li>
+            <li>Фильтры до пустой выборки — корректное пустое состояние без ошибок в консоли.</li>
+            <li>Битый JSON, JSON не-массивом, запись без поля, <code>suspicion_level</code> = 15, время «25:00» — каждый случай дает конкретное сообщение с номером записи, а не общее «ошибка».</li>
+            <li>JSON с дублирующимися id — загрузка отклоняется.</li>
+            <li>Крайние значения весов (0 и максимум) — лидер рейтинга меняется предсказуемо, объяснение соответствует новым числам.</li>
+            <li>Добавление, редактирование и удаление наблюдения — состояние и все производные блоки пересчитываются согласованно.</li>
+            <li>Сброс фильтров и сброс данных возвращают приложение в исходное состояние.</li>
+            <li>Отдельно проверила соответствие финального файла пунктам PRD — построчно по разделу требований.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const initialObservations = [
+      {
+        id: "obs_001",
+        fox_id: "fox_001",
+        location: "Северная поляна",
+        color: "рыжая",
+        has_prey: true,
+        suspicion_level: 8,
+        time: "08:20"
+      },
+      {
+        id: "obs_002",
+        fox_id: "fox_002",
+        location: "Туманная тропа",
+        color: "черная",
+        has_prey: false,
+        suspicion_level: 5,
+        time: "09:05"
+      },
+      {
+        id: "obs_003",
+        fox_id: "fox_001",
+        location: "Северная поляна",
+        color: "рыжая",
+        has_prey: false,
+        suspicion_level: 9,
+        time: "10:40"
+      },
+      {
+        id: "obs_004",
+        fox_id: "fox_003",
+        location: "Моховой овраг",
+        color: "серебристая",
+        has_prey: true,
+        suspicion_level: 7,
+        time: "11:15"
+      },
+      {
+        id: "obs_005",
+        fox_id: "fox_004",
+        location: "Северная поляна",
+        color: "рыжая",
+        has_prey: false,
+        suspicion_level: 3,
+        time: "12:10"
+      }
+    ];
+
+    const defaultSettings = {
+      suspicionWeight: 1.4,
+      preyBonus: 3,
+      repeatBonus: 2
+    };
+
+    const foxNames = {
+      fox_001: "Рыжая Молния",
+      fox_002: "Угольная Тень",
+      fox_003: "Серебряный Шорох",
+      fox_004: "Северная Искра",
+      fox_005: "Тихая Лапа"
+    };
+
+    const state = {
+      observations: clone(initialObservations),
+      filters: {
+        location: "all",
+        color: "all",
+        onlyPrey: false,
+        minSuspicion: 0
+      },
+      settings: { ...defaultSettings }
+    };
+
+    const els = {
+      statusLine: document.querySelector("#statusLine"),
+      mapHint: document.querySelector("#mapHint"),
+      mapNorth: document.querySelector("#mapNorth"),
+      mapTrail: document.querySelector("#mapTrail"),
+      mapRavine: document.querySelector("#mapRavine"),
+      uniqueFoxMetric: document.querySelector("#uniqueFoxMetric"),
+      totalMetric: document.querySelector("#totalMetric"),
+      topLocationMetric: document.querySelector("#topLocationMetric"),
+      topFoxMetric: document.querySelector("#topFoxMetric"),
+      locationFilter: document.querySelector("#locationFilter"),
+      colorFilter: document.querySelector("#colorFilter"),
+      preyFilter: document.querySelector("#preyFilter"),
+      minSuspicion: document.querySelector("#minSuspicion"),
+      minSuspicionValue: document.querySelector("#minSuspicionValue"),
+      suspicionWeight: document.querySelector("#suspicionWeight"),
+      suspicionWeightValue: document.querySelector("#suspicionWeightValue"),
+      preyBonus: document.querySelector("#preyBonus"),
+      preyBonusValue: document.querySelector("#preyBonusValue"),
+      repeatBonus: document.querySelector("#repeatBonus"),
+      repeatBonusValue: document.querySelector("#repeatBonusValue"),
+      resetFiltersBtn: document.querySelector("#resetFiltersBtn"),
+      resetDataBtn: document.querySelector("#resetDataBtn"),
+      addForm: document.querySelector("#addForm"),
+      newFoxId: document.querySelector("#newFoxId"),
+      newTime: document.querySelector("#newTime"),
+      newLocation: document.querySelector("#newLocation"),
+      newColor: document.querySelector("#newColor"),
+      newHasPrey: document.querySelector("#newHasPrey"),
+      newSuspicion: document.querySelector("#newSuspicion"),
+      newSuspicionValue: document.querySelector("#newSuspicionValue"),
+      formMessage: document.querySelector("#formMessage"),
+      jsonInput: document.querySelector("#jsonInput"),
+      loadJsonBtn: document.querySelector("#loadJsonBtn"),
+      jsonMessage: document.querySelector("#jsonMessage"),
+      observationsView: document.querySelector("#observationsView"),
+      observationMessage: document.querySelector("#observationMessage"),
+      observationSubhead: document.querySelector("#observationSubhead"),
+      reportBox: document.querySelector("#reportBox"),
+      rankingView: document.querySelector("#rankingView"),
+    };
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value || "").trim();
+    }
+
+    function getFoxName(foxId) {
+      if (foxNames[foxId]) return foxNames[foxId];
+      const numericPart = String(foxId || "").match(/\d+/)?.[0];
+      return numericPart ? `Лиса ${Number(numericPart)}` : "Новая лиса";
+    }
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString("ru-RU", {
+        maximumFractionDigits: 1
+      });
+    }
+
+    function pluralRu(count, one, few, many) {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return one;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+      return many;
+    }
+
+    function uniqueValues(items, key) {
+      return [...new Set(items.map((item) => item[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ru"));
+    }
+
+    function filterObservations(observations, filters) {
+      return observations.filter((obs) => {
+        const matchLocation = filters.location === "all" || obs.location === filters.location;
+        const matchColor = filters.color === "all" || obs.color === filters.color;
+        const matchPrey = !filters.onlyPrey || obs.has_prey;
+        const matchSuspicion = Number(obs.suspicion_level) >= Number(filters.minSuspicion);
+        return matchLocation && matchColor && matchPrey && matchSuspicion;
+      });
+    }
+
+    function getUniqueFoxCount(observations) {
+      return new Set(observations.map((obs) => obs.fox_id)).size;
+    }
+
+    function getTopLocation(observations) {
+      const counts = observations.reduce((acc, obs) => {
+        acc[obs.location] = (acc[obs.location] || 0) + 1;
+        return acc;
+      }, {});
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ru"));
+      if (!entries.length) return null;
+      return { location: entries[0][0], count: entries[0][1] };
+    }
+
+    function groupByFox(observations) {
+      return observations.reduce((acc, obs) => {
+        if (!acc[obs.fox_id]) acc[obs.fox_id] = [];
+        acc[obs.fox_id].push(obs);
+        return acc;
+      }, {});
+    }
+
+    function calculateFoxRanking(observations, settings) {
+      return Object.entries(groupByFox(observations))
+        .map(([foxId, foxObservations]) => {
+          const observationCount = foxObservations.length;
+          const suspicionSum = foxObservations.reduce((sum, obs) => sum + Number(obs.suspicion_level), 0);
+          const averageSuspicion = suspicionSum / observationCount;
+          const preyCount = foxObservations.filter((obs) => obs.has_prey).length;
+          const repeatCount = Math.max(0, observationCount - 1);
+          const score = averageSuspicion * settings.suspicionWeight + preyCount * settings.preyBonus + repeatCount * settings.repeatBonus;
+          const locationCounts = foxObservations.reduce((acc, obs) => {
+            acc[obs.location] = (acc[obs.location] || 0) + 1;
+            return acc;
+          }, {});
+          const mainLocation = Object.entries(locationCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "нет локации";
+          const color = foxObservations[0]?.color || "неизвестно";
+          const name = getFoxName(foxId);
+          return {
+            foxId,
+            name,
+            color,
+            observationCount,
+            averageSuspicion,
+            preyCount,
+            repeatCount,
+            mainLocation,
+            score,
+            explanation: buildFoxExplanation({
+              foxId,
+              name,
+              observationCount,
+              averageSuspicion,
+              preyCount,
+              repeatCount,
+              mainLocation,
+              score,
+              settings
+            })
+          };
+        })
+        .sort((a, b) => b.score - a.score || b.averageSuspicion - a.averageSuspicion || a.foxId.localeCompare(b.foxId));
+    }
+
+    function buildFoxExplanation(fox) {
+      const repeatText = fox.repeatCount > 0
+        ? `повторные появления добавили ${formatNumber(fox.repeatCount * fox.settings.repeatBonus)}`
+        : "повторных появлений не было";
+      const preyText = fox.preyCount > 0
+        ? `добыча добавила ${formatNumber(fox.preyCount * fox.settings.preyBonus)}`
+        : "добычи в выборке нет";
+      return `${fox.name}: средняя подозрительность ${formatNumber(fox.averageSuspicion)} умножена на вес ${formatNumber(fox.settings.suspicionWeight)}, ${preyText}, ${repeatText}. Основная локация: ${fox.mainLocation}.`;
+    }
+
+    function buildReport(filteredObservations, ranking, topLocation) {
+      if (!filteredObservations.length) {
+        return "По текущим фильтрам наблюдений нет. Смотрителю стоит расширить выборку или загрузить новые записи.";
+      }
+
+      const topFox = ranking[0];
+      const locationPart = topLocation
+        ? `Больше всего активности сейчас в точке <strong>${escapeHtml(topLocation.location)}</strong>: ${topLocation.count} ${pluralRu(topLocation.count, "наблюдение", "наблюдения", "наблюдений")}.`
+        : "Активная локация не определена.";
+      const topFoxPart = topFox
+        ? `Самая подозрительная лиса — <strong>${escapeHtml(topFox.name)}</strong>, score ${formatNumber(topFox.score)}. Она встречалась ${topFox.observationCount} ${pluralRu(topFox.observationCount, "раз", "раза", "раз")}, средняя подозрительность ${formatNumber(topFox.averageSuspicion)}, добыча отмечена ${topFox.preyCount} ${pluralRu(topFox.preyCount, "раз", "раза", "раз")}.`
+        : "Самая подозрительная лиса не определена.";
+      const recommendation = topFox
+        ? `Рекомендация: усилить наблюдение за ${escapeHtml(topFox.mainLocation)} и проверить следующие появления ${escapeHtml(topFox.name)} до смены маршрута.`
+        : "Рекомендация: добавить новые наблюдения и повторить расчет.";
+      return `${locationPart} ${topFoxPart} ${recommendation}`;
+    }
+
+    function validateObservation(raw, index) {
+      const required = ["id", "fox_id", "location", "color", "has_prey", "suspicion_level", "time"];
+      const missing = required.filter((field) => !(field in raw));
+      if (missing.length) return `Запись ${index + 1}: нет поля ${missing[0]}.`;
+      const suspicion = Number(raw.suspicion_level);
+      if (!Number.isFinite(suspicion) || suspicion < 0 || suspicion > 10) {
+        return `Запись ${index + 1}: suspicion_level должен быть числом от 0 до 10.`;
+      }
+      if (typeof raw.has_prey !== "boolean") return `Запись ${index + 1}: has_prey должен быть true или false.`;
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(raw.time))) return `Запись ${index + 1}: time должен быть в формате HH:MM.`;
+      if (!normalizeText(raw.id) || !normalizeText(raw.fox_id) || !normalizeText(raw.location) || !normalizeText(raw.color)) {
+        return `Запись ${index + 1}: текстовые поля не должны быть пустыми.`;
+      }
+      return "";
+    }
+
+    function validateObservationList(observations) {
+      const seenIds = new Set();
+      for (let index = 0; index < observations.length; index += 1) {
+        const error = validateObservation(observations[index], index);
+        if (error) return error;
+        const id = normalizeText(observations[index].id);
+        if (seenIds.has(id)) return `Запись ${index + 1}: id ${id} уже встречался в JSON.`;
+        seenIds.add(id);
+      }
+      return "";
+    }
+
+    function sanitizeObservation(raw) {
+      return {
+        id: normalizeText(raw.id),
+        fox_id: normalizeText(raw.fox_id),
+        location: normalizeText(raw.location),
+        color: normalizeText(raw.color),
+        has_prey: Boolean(raw.has_prey),
+        suspicion_level: Math.max(0, Math.min(10, Number(raw.suspicion_level))),
+        time: String(raw.time)
+      };
+    }
+
+    function getColorClass(color) {
+      const lower = color.toLowerCase();
+      if (lower.includes("чер")) return "black";
+      if (lower.includes("сер")) return "silver";
+      return "red";
+    }
+
+    function renderSelect(select, values, current, allLabel) {
+      const options = [`<option value="all">${allLabel}</option>`]
+        .concat(values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`));
+      select.innerHTML = options.join("");
+      select.value = values.includes(current) ? current : "all";
+    }
+
+    function renderControls() {
+      renderSelect(els.locationFilter, uniqueValues(state.observations, "location"), state.filters.location, "Все локации");
+      renderSelect(els.colorFilter, uniqueValues(state.observations, "color"), state.filters.color, "Все цвета");
+      els.preyFilter.checked = state.filters.onlyPrey;
+      els.minSuspicion.value = state.filters.minSuspicion;
+      els.minSuspicionValue.value = state.filters.minSuspicion;
+      els.suspicionWeight.value = state.settings.suspicionWeight;
+      els.suspicionWeightValue.value = formatNumber(state.settings.suspicionWeight);
+      els.preyBonus.value = state.settings.preyBonus;
+      els.preyBonusValue.value = formatNumber(state.settings.preyBonus);
+      els.repeatBonus.value = state.settings.repeatBonus;
+      els.repeatBonusValue.value = formatNumber(state.settings.repeatBonus);
+      els.newSuspicionValue.value = els.newSuspicion.value;
+    }
+
+    function renderMetrics(filtered, ranking, topLocation) {
+      const topFox = ranking[0] || null;
+      els.uniqueFoxMetric.textContent = getUniqueFoxCount(filtered);
+      els.totalMetric.textContent = filtered.length;
+      els.topLocationMetric.textContent = topLocation?.location || "—";
+      els.topFoxMetric.textContent = topFox?.name || "—";
+      els.statusLine.textContent = buildStatus(filtered, topLocation, topFox);
+      renderMap(topLocation);
+    }
+
+    function buildStatus(filtered, topLocation, topFox) {
+      if (!filtered.length) return "По текущим фильтрам в лесу тихо: наблюдения не найдены.";
+      const foxCount = getUniqueFoxCount(filtered);
+      const foxWord = pluralRu(foxCount, "лиса", "лисы", "лис");
+      const locationText = topLocation ? `активность выше всего на ${topLocation.location}` : "активная точка не определена";
+      const topText = topFox ? `главный кандидат на проверку — ${topFox.name}` : "кандидатов на проверку нет";
+      return `Сегодня замечено ${foxCount} ${foxWord}, ${locationText}; ${topText}.`;
+    }
+
+    function renderMap(topLocation) {
+      const dots = [
+        { el: els.mapNorth, key: "Северная поляна" },
+        { el: els.mapTrail, key: "Туманная тропа" },
+        { el: els.mapRavine, key: "Моховой овраг" }
+      ];
+      dots.forEach((dot) => {
+        const isActive = topLocation?.location === dot.key;
+        dot.el.style.fill = isActive ? "#2f7df0" : "#cbd5e1";
+        dot.el.style.opacity = isActive ? "1" : "0.38";
+      });
+      els.mapHint.textContent = topLocation ? `${topLocation.location}: ${topLocation.count}` : "Активная точка не найдена";
+    }
+
+    function renderObservations(filtered, ranking) {
+      els.observationSubhead.textContent = `${filtered.length} ${pluralRu(filtered.length, "запись", "записи", "записей")} в текущей выборке.`;
+      if (!filtered.length) {
+        els.observationsView.innerHTML = `
+          <div class="empty-state">
+            <strong>Наблюдений не найдено</strong>
+            <span>Сбросьте фильтры, добавьте запись или загрузите JSON.</span>
+          </div>
+        `;
+        return;
+      }
+
+      const topFoxId = ranking[0]?.foxId || "";
+      const rows = filtered
+        .slice()
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .map((obs) => {
+          const rowClass = obs.fox_id === topFoxId ? "top-fox-row" : "";
+          return `
+            <tr class="${rowClass}">
+              <td data-label="Время">
+                <label class="visually-hidden" for="time-${escapeHtml(obs.id)}">Время ${escapeHtml(obs.id)}</label>
+                <input id="time-${escapeHtml(obs.id)}" class="cell-input mono" type="time" required value="${escapeHtml(obs.time)}" data-action="edit-field" data-field="time" data-id="${escapeHtml(obs.id)}">
+              </td>
+              <td data-label="Лиса">
+                <label class="visually-hidden" for="fox-${escapeHtml(obs.id)}">fox_id ${escapeHtml(obs.id)}</label>
+                <input id="fox-${escapeHtml(obs.id)}" class="cell-input mono" type="text" required value="${escapeHtml(obs.fox_id)}" data-action="edit-field" data-field="fox_id" data-id="${escapeHtml(obs.id)}">
+              </td>
+              <td data-label="Локация">
+                <label class="visually-hidden" for="location-${escapeHtml(obs.id)}">Локация ${escapeHtml(obs.id)}</label>
+                <input id="location-${escapeHtml(obs.id)}" class="cell-input" type="text" required value="${escapeHtml(obs.location)}" data-action="edit-field" data-field="location" data-id="${escapeHtml(obs.id)}">
+              </td>
+              <td data-label="Цвет">
+                <span class="editable-color">
+                  <span class="color-dot ${getColorClass(obs.color)}"></span>
+                  <label class="visually-hidden" for="color-${escapeHtml(obs.id)}">Цвет ${escapeHtml(obs.id)}</label>
+                  <input id="color-${escapeHtml(obs.id)}" class="cell-input" type="text" required value="${escapeHtml(obs.color)}" data-action="edit-field" data-field="color" data-id="${escapeHtml(obs.id)}">
+                </span>
+              </td>
+              <td data-label="Добыча">
+                <label class="visually-hidden" for="prey-${escapeHtml(obs.id)}">Добыча ${escapeHtml(obs.id)}</label>
+                <input id="prey-${escapeHtml(obs.id)}" type="checkbox" data-action="toggle-prey" data-id="${escapeHtml(obs.id)}" ${obs.has_prey ? "checked" : ""}>
+              </td>
+              <td data-label="Подозрительность">
+                <span class="inline-range">
+                  <label class="visually-hidden" for="suspicion-${escapeHtml(obs.id)}">Подозрительность ${escapeHtml(obs.id)}</label>
+                  <input id="suspicion-${escapeHtml(obs.id)}" type="range" min="0" max="10" step="1" value="${obs.suspicion_level}" data-action="change-suspicion" data-id="${escapeHtml(obs.id)}">
+                  <output>${obs.suspicion_level}</output>
+                </span>
+              </td>
+              <td data-label="Действие">
+                <button class="btn danger" type="button" data-action="delete" data-id="${escapeHtml(obs.id)}" title="Удалить наблюдение ${escapeHtml(obs.id)}">
+                  <span class="icon" aria-hidden="true">×</span>
+                  Удалить
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+
+      els.observationsView.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Время</th>
+                <th>Лиса</th>
+                <th>Локация</th>
+                <th>Цвет</th>
+                <th>Добыча</th>
+                <th>Подозрительность</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody>${rows.join("")}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderRanking(ranking) {
+      if (!ranking.length) {
+        els.rankingView.innerHTML = `
+          <div class="empty-state">
+            <strong>Рейтинг пуст</strong>
+            <span>В текущей выборке нет лис для расчета score.</span>
+          </div>
+        `;
+        return;
+      }
+
+      els.rankingView.innerHTML = `
+        <div class="ranking-list">
+          ${ranking.map((fox, index) => `
+            <article class="ranking-item ${index === 0 ? "top" : ""}">
+              <div class="rank-head">
+                <span class="rank-number">${index + 1}</span>
+                <div>
+                  <h3>${escapeHtml(fox.name)}</h3>
+                  <div class="rank-meta">
+                    <span class="badge"><span class="color-dot ${getColorClass(fox.color)}"></span>${escapeHtml(fox.color)}</span>
+                    <span class="badge moss">${fox.observationCount} ${pluralRu(fox.observationCount, "наблюдение", "наблюдения", "наблюдений")}</span>
+                    <span class="badge">${fox.preyCount} с добычей</span>
+                    <span class="badge">среднее ${formatNumber(fox.averageSuspicion)}</span>
+                  </div>
+                </div>
+                <span class="rank-score">${formatNumber(fox.score)}</span>
+              </div>
+              <p class="explanation">${escapeHtml(fox.explanation)}</p>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function render() {
+      if (!uniqueValues(state.observations, "location").includes(state.filters.location)) state.filters.location = "all";
+      if (!uniqueValues(state.observations, "color").includes(state.filters.color)) state.filters.color = "all";
+      const filtered = filterObservations(state.observations, state.filters);
+      const topLocation = getTopLocation(filtered);
+      const ranking = calculateFoxRanking(filtered, state.settings);
+      renderControls();
+      renderMetrics(filtered, ranking, topLocation);
+      renderObservations(filtered, ranking);
+      els.reportBox.innerHTML = buildReport(filtered, ranking, topLocation);
+      renderRanking(ranking);
+    }
+
+    function setJsonMessage(text, type = "") {
+      els.jsonMessage.textContent = text;
+      els.jsonMessage.className = `json-message ${type}`.trim();
+    }
+
+    function setFormMessage(text, type = "") {
+      els.formMessage.textContent = text;
+      els.formMessage.className = `form-message ${type}`.trim();
+    }
+
+    function setObservationMessage(text, type = "") {
+      els.observationMessage.textContent = text;
+      els.observationMessage.className = `json-message ${type}`.trim();
+    }
+
+    function nextObservationId() {
+      const maxId = state.observations.reduce((max, obs) => {
+        const match = String(obs.id).match(/obs_(\d+)/);
+        return match ? Math.max(max, Number(match[1])) : max;
+      }, 0);
+      return `obs_${String(maxId + 1).padStart(3, "0")}`;
+    }
+
+    function bindEvents() {
+      els.locationFilter.addEventListener("change", (event) => {
+        state.filters.location = event.target.value;
+        render();
+      });
+      els.colorFilter.addEventListener("change", (event) => {
+        state.filters.color = event.target.value;
+        render();
+      });
+      els.preyFilter.addEventListener("change", (event) => {
+        state.filters.onlyPrey = event.target.checked;
+        render();
+      });
+      els.minSuspicion.addEventListener("input", (event) => {
+        state.filters.minSuspicion = Number(event.target.value);
+        render();
+      });
+      els.suspicionWeight.addEventListener("input", (event) => {
+        state.settings.suspicionWeight = Number(event.target.value);
+        render();
+      });
+      els.preyBonus.addEventListener("input", (event) => {
+        state.settings.preyBonus = Number(event.target.value);
+        render();
+      });
+      els.repeatBonus.addEventListener("input", (event) => {
+        state.settings.repeatBonus = Number(event.target.value);
+        render();
+      });
+      els.newSuspicion.addEventListener("input", (event) => {
+        els.newSuspicionValue.value = event.target.value;
+      });
+      els.resetFiltersBtn.addEventListener("click", () => {
+        state.filters = {
+          location: "all",
+          color: "all",
+          onlyPrey: false,
+          minSuspicion: 0
+        };
+        render();
+      });
+      els.resetDataBtn.addEventListener("click", () => {
+        state.observations = clone(initialObservations);
+        state.settings = { ...defaultSettings };
+        state.filters = {
+          location: "all",
+          color: "all",
+          onlyPrey: false,
+          minSuspicion: 0
+        };
+        setJsonMessage("");
+        setFormMessage("");
+        setObservationMessage("");
+        render();
+      });
+      els.addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const newObservation = {
+          id: nextObservationId(),
+          fox_id: normalizeText(els.newFoxId.value),
+          location: normalizeText(els.newLocation.value),
+          color: normalizeText(els.newColor.value),
+          has_prey: els.newHasPrey.checked,
+          suspicion_level: Number(els.newSuspicion.value),
+          time: els.newTime.value
+        };
+        const validationError = validateObservation(newObservation, 0);
+        if (validationError) {
+          setFormMessage(validationError, "error");
+          return;
+        }
+        state.observations = [...state.observations, newObservation];
+        setFormMessage(`Добавлено наблюдение ${newObservation.id}.`, "success");
+        setJsonMessage("");
+        render();
+      });
+      els.loadJsonBtn.addEventListener("click", () => {
+        try {
+          const parsed = JSON.parse(els.jsonInput.value);
+          if (!Array.isArray(parsed)) {
+            setJsonMessage("JSON должен быть массивом наблюдений.", "error");
+            return;
+          }
+          const validationError = validateObservationList(parsed);
+          if (validationError) {
+            setJsonMessage(validationError, "error");
+            return;
+          }
+          state.observations = parsed.map(sanitizeObservation);
+          state.filters = {
+            location: "all",
+            color: "all",
+            onlyPrey: false,
+            minSuspicion: 0
+          };
+          setJsonMessage(`Загружено ${state.observations.length} ${pluralRu(state.observations.length, "наблюдение", "наблюдения", "наблюдений")}.`, "success");
+          setFormMessage("");
+          setObservationMessage("");
+          render();
+        } catch (error) {
+          setJsonMessage(`JSON не загружен: ${error.message}`, "error");
+        }
+      });
+      els.observationsView.addEventListener("input", (event) => {
+        const id = event.target.dataset.id;
+        if (!id) return;
+        if (event.target.dataset.action === "change-suspicion") {
+          state.observations = state.observations.map((obs) => obs.id === id ? { ...obs, suspicion_level: Number(event.target.value) } : obs);
+          render();
+        }
+      });
+      els.observationsView.addEventListener("change", (event) => {
+        const id = event.target.dataset.id;
+        if (!id) return;
+        if (event.target.dataset.action === "toggle-prey") {
+          state.observations = state.observations.map((obs) => obs.id === id ? { ...obs, has_prey: event.target.checked } : obs);
+          setObservationMessage(`Обновлена добыча для ${id}.`, "success");
+          render();
+          return;
+        }
+        if (event.target.dataset.action === "edit-field") {
+          const field = event.target.dataset.field;
+          const value = normalizeText(event.target.value);
+          const currentObservation = state.observations.find((obs) => obs.id === id);
+          if (!currentObservation || !field) return;
+          const updatedObservation = { ...currentObservation, [field]: value };
+          const validationError = validateObservation(updatedObservation, 0);
+          if (validationError) {
+            setObservationMessage(validationError, "error");
+            render();
+            return;
+          }
+          state.observations = state.observations.map((obs) => obs.id === id ? updatedObservation : obs);
+          setObservationMessage(`Обновлено наблюдение ${id}.`, "success");
+          render();
+        }
+      });
+      els.observationsView.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action='delete']");
+        if (!button) return;
+        const id = button.dataset.id;
+        state.observations = state.observations.filter((obs) => obs.id !== id);
+        setObservationMessage(`Удалено наблюдение ${id}.`, "success");
+        render();
+      });
+    }
+
+    bindEvents();
+    render();
+  </script>
+</body>
+</html>
